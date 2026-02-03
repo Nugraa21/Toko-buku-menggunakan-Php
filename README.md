@@ -1,49 +1,57 @@
-# 📚 BookStore Token App
+# BookStore Token
 
-Aplikasi Web Toko Buku Modern berbasis PHP Native dengan sistem pembayaran menggunakan **Token**.
+Aplikasi toko buku online berbasis token dengan sistem autentikasi, manajemen keranjang, dan panel admin lengkap. Dibuat dengan PHP Native, MySQL, dan CSS Modern (Saweria Theme).
 
-## ✨ Fitur Utama
-*   **Sistem Token**: Pengguna harus melakukan Top Up token sebelum bisa membeli buku.
-*   **Admin Dashboard**:
-    *   Konfirmasi Top Up Token (Approve/Reject).
-    *   Melihat riwayat transaksi.
-*   **User Features**:
-    *   Login & Register.
-    *   Katalog Buku dengan harga dalam Token.
-    *   Shopping Cart (Keranjang).
-    *   Checkout Otomatis (Saldo Token langsung terpotong).
-    *   Riwayat Pembelian & Riwayat Top Up.
-*   **UI Modern**: Tema gelap dengan gaya Glassmorphism.
+## 🚀 Fitur
 
-## ⚙️ Instalasi
-1.  **Requirement**: XAMPP (Apache & MySQL).
-2.  **Database**:
-    *   Buka phpMyAdmin (`http://localhost/phpmyadmin`).
-    *   Import file `data.sql` yang ada di folder project.
-    *   Atau jalankan query SQL di dalam `data.sql` secara manual. ini akan membuat DB `autentikasi` (atau `bookstore_db` sesuai edit terakhir).
-3.  **Konfigurasi**:
-    *   Pastikan file `config/database.php` sesuai dengan kredensial database Anda (default: root, tanpa password).
+### User (Pengguna)
+-   **Autentikasi**: Login, Register, Logout.
+-   **Dashboard**: Melihat katalog buku.
+-   **Profile User**: Edit Nama, Email, dan Password.
+-   **Transaksi**:
+    -   Topup Token (Request ke Admin).
+    -   Beli Buku (Add to Cart, Checkout).
+    -   Riwayat Transaksi & Topup.
+
+### Admin
+-   **Dashboard**: Ringkasan transaksi dan request topup.
+-   **Manajemen User**: Tambah, Edit, Hapus User.
+-   **Manajemen Buku**: Tambah, Edit, Hapus Buku, Update Stok/Harga.
+-   **Manajemen Topup**: Approve/Reject permintaan topup user.
+
+## 🛠️ Instalasi
+
+1.  **Clone / Download** repository ini.
+2.  **Pindahkan** folder ke `c:\xampp\htdocs\autentikasi`.
+3.  **Import Database**:
+    -   Buka PHPMyAdmin (`http://localhost/phpmyadmin`).
+    -   Buat database baru bernama `autentikasi`.
+    -   Import file `data.sql` yang ada di folder project.
 4.  **Jalankan**:
-    *   Buka browser: `http://localhost/autentikasi`
+    -   Buka Browser dan akses `http://localhost/autentikasi`.
 
-## 👤 Akun Default
-**Admin** (Bisa Approve Top Up)
-*   Email: `admin@toko.com`
-*   Pass: `12345`
+## 📂 Struktur Folder
 
-**User Demo**
-*   Email: `user@toko.com`
-*   Pass: `12345`
+-   `assets/`: File CSS, Gambar, JS.
+    -   `css/style.css`: Styling utama (Light Theme).
+-   `config/`: Konfigurasi Database.
+-   `includes/`: Header, Footer, Functions.
+-   `pages/`: Semua halaman fungsional (Home, Login, Admin, dll).
+-   `index.php`: Router utama.
 
-## 🪙 Cara Menggunakan (User)
-1.  Daftar akun baru.
-2.  Login.
-3.  Masuk ke menu **Top Up** (ikon koin kuning).
-4.  Masukkan jumlah token yang diinginkan, klik Minta Top Up.
-5.  Status akan *Pending* sampai Admin menyetujui.
-6.  Setelah disetujui, saldo bertambah dan bisa belanja buku!
+## 🔑 Akun Default
 
-## 🛡️ Cara Menggunakan (Admin)
-1.  Login dengan akun Admin.
-2.  Masuk ke menu **Admin**.
-3.  Di tabel "Permintaan Top Up", klik **Terima** untuk menambah saldo user.
+| Role  | Email           | Password |
+| :---: | :-------------- | :------- |
+| Admin | admin@toko.com  | password |
+| User  | user@toko.com   | password |
+
+## 🎨 UI/UX Design
+
+Desain menggunakan tema "Light Glassmorphism" yang terinspirasi dari Saweria.co.
+-   **Primary Color**: Yellow/Orange/Amber.
+-   **Background**: Clean White/Light Gray.
+-   **Font**: Outfit (Google Fonts).
+
+---
+Developed for learning purposes.
