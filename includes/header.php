@@ -89,21 +89,23 @@
 
                 <!-- Right Side (Cart & Auth) -->
                 <div class="flex items-center gap-4">
-                    <!-- Cart -->
-                    <a href="index.php?page=cart"
-                        class="relative group p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <?php if (getCartCount() > 0): ?>
-                            <span
-                                class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-                                <?= getCartCount() ?>
-                            </span>
-                        <?php endif; ?>
-                    </a>
+                    <!-- Cart (Only for Users) -->
+                    <?php if (!isAdmin()): ?>
+                        <a href="index.php?page=cart"
+                            class="relative group p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                            <?php if (getCartCount() > 0): ?>
+                                <span
+                                    class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                                    <?= getCartCount() ?>
+                                </span>
+                            <?php endif; ?>
+                        </a>
+                    <?php endif; ?>
 
                     <?php if (isLoggedIn()): ?>
                         <!-- User Token & Profile -->

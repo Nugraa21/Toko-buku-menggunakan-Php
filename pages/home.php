@@ -109,18 +109,20 @@ $books = $stmt->fetchAll();
                             <span class="block text-xs text-slate-400 uppercase font-bold tracking-wider">Harga</span>
                             <span class="text-lg font-extrabold text-primary">🪙 <?= number_format($book['price']) ?></span>
                         </div>
-                        <form action="index.php?page=cart_action" method="POST">
-                            <input type="hidden" name="action" value="add">
-                            <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
-                            <button type="submit"
-                                class="w-10 h-10 rounded-full bg-slate-50 text-slate-700 flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                            </button>
-                        </form>
+                        <?php if (!isAdmin()): ?>
+                            <form action="index.php?page=cart_action" method="POST">
+                                <input type="hidden" name="action" value="add">
+                                <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
+                                <button type="submit"
+                                    class="w-10 h-10 rounded-full bg-slate-50 text-slate-700 flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

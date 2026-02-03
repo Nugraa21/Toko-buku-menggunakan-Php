@@ -91,6 +91,19 @@ $topups = $pdo->query("
                     <h4 class="text-lg font-bold text-slate-800 mb-1">Katalog Buku</h4>
                     <p class="text-sm text-slate-500">Tambah buku baru, upload cover, update stok dan harga.</p>
                 </a>
+
+                <a href="index.php?page=admin_transactions"
+                    class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-primary/50 transition-all hover:shadow-md sm:col-span-2">
+                    <div class="flex justify-between items-start mb-4">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xl group-hover:bg-primary group-hover:text-white transition-colors">
+                            📈</div>
+                        <span class="text-slate-300 group-hover:text-primary transition-colors">&rarr;</span>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-800 mb-1">Riwayat Penjualan</h4>
+                    <p class="text-sm text-slate-500">Lihat semua transaksi pembelian user dan statistik buku terlaris.
+                    </p>
+                </a>
             </div>
         </div>
 

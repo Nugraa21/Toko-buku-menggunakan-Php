@@ -3,6 +3,7 @@ USE autentikasi;
 
 -- Disable foreign key checks for clean cleanup
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS topups;
 DROP TABLE IF EXISTS transaction_items;
 DROP TABLE IF EXISTS transactions;
@@ -58,6 +59,17 @@ CREATE TABLE topups (
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    book_id INT NOT NULL,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
 );
 
 -- Sample Users (password: password)
