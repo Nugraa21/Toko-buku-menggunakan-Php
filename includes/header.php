@@ -71,18 +71,22 @@
                 <div class="hidden md:flex space-x-8 items-center">
                     <a href="index.php"
                         class="text-slate-600 hover:text-primary font-medium transition-colors">Beranda</a>
-                    <a href="index.php?page=home#katalog"
-                        class="text-slate-600 hover:text-primary font-medium transition-colors">Katalog</a>
 
-                    <?php if (isLoggedIn()): ?>
-                        <a href="index.php?page=history"
-                            class="text-slate-600 hover:text-primary font-medium transition-colors">Riwayat</a>
-                        <a href="index.php?page=topup"
-                            class="text-slate-600 hover:text-primary font-medium transition-colors">Top Up</a>
-
-                        <?php if (isAdmin()): ?>
-                            <a href="index.php?page=admin"
-                                class="text-rose-600 hover:text-rose-700 font-medium transition-colors">Admin Panel</a>
+                    <?php if (isAdmin()): ?>
+                        <!-- Admin Menu -->
+                        <a href="index.php?page=admin"
+                            class="text-slate-600 hover:text-primary font-medium transition-colors">Dashboard</a>
+                        <a href="index.php?page=admin_transactions"
+                            class="text-slate-600 hover:text-primary font-medium transition-colors">Penjualan</a>
+                    <?php else: ?>
+                        <!-- User Menu -->
+                        <a href="index.php?page=catalog"
+                            class="text-slate-600 hover:text-primary font-medium transition-colors">Katalog</a>
+                        <?php if (isLoggedIn()): ?>
+                            <a href="index.php?page=library"
+                                class="text-slate-600 hover:text-primary font-medium transition-colors">Pustakaku</a>
+                            <a href="index.php?page=history"
+                                class="text-slate-600 hover:text-primary font-medium transition-colors">Riwayat</a>
                         <?php endif; ?>
                     <?php endif; ?>
                 </div>
@@ -108,14 +112,24 @@
                     <?php endif; ?>
 
                     <?php if (isLoggedIn()): ?>
-                        <!-- User Token & Profile -->
+                        <!-- User Token / Admin Revenue & Profile -->
                         <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
                             <div class="hidden sm:flex flex-col items-end">
-                                <span class="text-xs text-slate-500">Saldo Token</span>
-                                <span class="text-sm font-bold text-primary">🪙 <?= number_format($current_tokens) ?></span>
+                                <?php if (isAdmin()): ?>
+                                    <?php
+                                    // Calculate Revenue for display (Quick query)
+                                    $revenue = $pdo->query("SELECT SUM(total_tokens) FROM transactions")->fetchColumn() ?: 0;
+                                    ?>
+                                    <span class="text-xs text-slate-500">Total Pendapatan</span>
+                                    <span class="text-sm font-bold text-green-600">🪙 <?= number_format($revenue) ?></span>
+                                <?php else: ?>
+                                    <span class="text-xs text-slate-500">Saldo Token</span>
+                                    <a href="index.php?page=topup" class="text-sm font-bold text-primary hover:underline">🪙
+                                        <?= number_format($current_tokens) ?> +</a>
+                                <?php endif; ?>
                             </div>
                             <div class="relative group">
-                                <a href="index.php?page=profile">
+                                <a href="<?= isAdmin() ? 'index.php?page=admin' : 'index.php?page=profile' ?>">
                                     <div
                                         class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold border-2 border-white shadow-sm cursor-pointer hover:bg-slate-300 transition-colors">
                                         <?= substr($_SESSION['user_name'] ?? 'U', 0, 1) ?>
@@ -125,8 +139,17 @@
                                 <div
                                     class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0">
                                     <div class="py-1">
-                                        <a href="index.php?page=profile"
-                                            class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile</a>
+                                        <?php if (isAdmin()): ?>
+                                            <a href="index.php?page=admin"
+                                                class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard
+                                                Admin</a>
+                                        <?php else: ?>
+                                            <a href="index.php?page=profile"
+                                                class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profil Saya</a>
+                                            <a href="index.php?page=library"
+                                                class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Pustakaku</a>
+                                        <?php endif; ?>
+                                        <div class="border-t border-slate-100 my-1"></div>
                                         <a href="index.php?page=logout"
                                             class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
                                     </div>

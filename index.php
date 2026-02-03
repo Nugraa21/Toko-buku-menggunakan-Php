@@ -5,7 +5,7 @@ ob_start(); // Start output buffering to prevent header errors
 require_once 'includes/functions.php';
 
 $page = $_GET['page'] ?? 'home';
-$allowed_pages = ['home', 'login', 'register', 'cart', 'cart_action', 'checkout', 'history', 'logout', 'admin', 'admin_action', 'topup', 'profile', 'admin_users', 'admin_books', 'detail', 'admin_transactions'];
+$allowed_pages = ['home', 'login', 'register', 'cart', 'cart_action', 'checkout', 'history', 'logout', 'admin', 'admin_action', 'topup', 'profile', 'admin_users', 'admin_books', 'detail', 'admin_transactions', 'catalog', 'library'];
 
 if (!in_array($page, $allowed_pages)) {
     $page = 'home';

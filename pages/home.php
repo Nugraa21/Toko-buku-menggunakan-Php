@@ -1,131 +1,140 @@
 <?php
-// Fetch featured/latest books
-$stmt = $pdo->query("SELECT * FROM books ORDER BY created_at DESC");
-$books = $stmt->fetchAll();
+// Get featured books (just taking 3 latest for "New Arrivals")
+$stmt = $pdo->query("SELECT * FROM books ORDER BY created_at DESC LIMIT 3");
+$new_books = $stmt->fetchAll();
+
+// Get "Best Sellers" (Simulated by random or manual pick if no sales data yet, but let's try to query sales)
+// If sales table exists, we could use that. For landing page cache/speed, simple query is fine.
+$best_sellers = $pdo->query("
+    SELECT b.* FROM books b 
+    LEFT JOIN transaction_items ti ON b.id = ti.book_id 
+    GROUP BY b.id 
+    ORDER BY SUM(ti.quantity) DESC 
+    LIMIT 3
+")->fetchAll();
+if (empty($best_sellers))
+    $best_sellers = $new_books; // Fallback
 ?>
 
-<!-- Hero Section -->
-<section class="relative bg-white rounded-3xl overflow-hidden shadow-2xl mb-16 border border-slate-100">
-    <!-- Background Decor -->
-    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-amber-100 opacity-50 blur-3xl"></div>
-    <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-50 opacity-50 blur-3xl"></div>
-
-    <div class="relative px-6 py-16 md:py-24 md:px-12 text-center max-w-4xl mx-auto">
-        <span
-            class="inline-block px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 font-bold text-sm mb-6 border border-amber-100">
-            ✨ Platform Buku Token #1 di Indonesia
-        </span>
-        <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight">
-            Jelajahi Dunia Pengetahuan <br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">Tanpa
-                Batas.</span>
-        </h1>
-        <p class="text-lg md:text-xl text-slate-500 mb-10 leading-relaxed max-w-2xl mx-auto">
-            Akses ribuan buku berkualitas premium menggunakan sistem token yang mudah, cepat, dan aman. Mulai membaca
-            hari ini.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#katalog"
-                class="px-8 py-4 bg-primary text-white text-lg font-bold rounded-full shadow-lg hover:bg-amber-600 hover:shadow-xl transition-all transform hover:-translate-y-1">
-                Jelajahi Katalog
-            </a>
-            <?php if (!isLoggedIn()): ?>
-                <a href="index.php?page=register"
-                    class="px-8 py-4 bg-white text-slate-700 border-2 border-slate-200 text-lg font-bold rounded-full hover:border-slate-800 hover:text-slate-900 transition-all">
-                    Daftar Sekarang
+<!-- Professional Hero Section -->
+<section class="relative bg-white rounded-3xl overflow-hidden shadow-2xl mb-20 border border-slate-100">
+    <div class="grid grid-cols-1 lg:grid-cols-2">
+        <div class="p-12 lg:p-20 flex flex-col justify-center relative z-10">
+            <span
+                class="inline-block px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 font-bold text-sm mb-6 border border-amber-100 w-fit">
+                ✨ Platform Buku Digital #1
+            </span>
+            <h1 class="text-5xl lg:text-7xl font-extrabold text-slate-900 tracking-tight mb-8 leading-[1.1]">
+                Buka Jendela <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">Dunia
+                    Baru.</span>
+            </h1>
+            <p class="text-lg text-slate-500 mb-10 leading-relaxed max-w-lg">
+                Temukan ribuan buku berkualitas, dari pengembangan diri hingga fiksi terbaik. Akses instan, baca kapan
+                saja.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="index.php?page=catalog"
+                    class="px-8 py-4 bg-primary text-white text-lg font-bold rounded-full shadow-lg hover:bg-amber-600 hover:shadow-xl transition-all transform hover:-translate-y-1 text-center">
+                    Mulai Membaca
                 </a>
-            <?php endif; ?>
+                <?php if (!isLoggedIn()): ?>
+                    <a href="index.php?page=register"
+                        class="px-8 py-4 bg-white text-slate-700 border-2 border-slate-200 text-lg font-bold rounded-full hover:border-slate-800 hover:text-slate-900 transition-all text-center">
+                        Daftar Gratis
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div
+            class="bg-gradient-to-br from-amber-50 to-white relative overflow-hidden flex items-center justify-center p-12">
+            <!-- Decorative blobs -->
+            <div class="absolute top-10 right-10 w-64 h-64 bg-amber-200 rounded-full blur-3xl opacity-30"></div>
+            <div class="absolute bottom-10 left-10 w-64 h-64 bg-orange-200 rounded-full blur-3xl opacity-30"></div>
+
+            <img src="https://cdni.iconscout.com/illustration/premium/thumb/online-library-4354728-3611369.png"
+                alt="Library Illustration"
+                class="relative z-10 w-full max-w-md drop-shadow-2xl hover:scale-105 transition-transform duration-500">
         </div>
     </div>
 </section>
 
-<!-- Stats Grid -->
+<!-- Features Grid -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 px-4">
     <div
-        class="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 text-center hover:scale-105 transition-transform duration-300">
-        <div class="text-4xl font-extrabold text-slate-900 mb-2">500+</div>
-        <div class="text-slate-500 font-medium">Buku Premium</div>
+        class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 text-left hover:-translate-y-2 transition-transform duration-300">
+        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6">⚡
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Akses Instan</h3>
+        <p class="text-slate-500 leading-relaxed">Beli dan langsung baca detik itu juga. Tanpa pengiriman fisik, tanpa
+            menunggu.</p>
     </div>
     <div
-        class="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 text-center hover:scale-105 transition-transform duration-300">
-        <div class="text-4xl font-extrabold text-slate-900 mb-2">10k+</div>
-        <div class="text-slate-500 font-medium">Pengguna Aktif</div>
+        class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 text-left hover:-translate-y-2 transition-transform duration-300">
+        <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mb-6">🔒
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Transaksi Aman</h3>
+        <p class="text-slate-500 leading-relaxed">Sistem token yang aman dan terenkripsi menjamin kenyamanan Anda
+            bertransaksi.</p>
     </div>
     <div
-        class="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 text-center hover:scale-105 transition-transform duration-300">
-        <div class="text-4xl font-extrabold text-slate-900 mb-2">Instant</div>
-        <div class="text-slate-500 font-medium">Akses Digital</div>
+        class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 text-left hover:-translate-y-2 transition-transform duration-300">
+        <div class="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-2xl mb-6">📱
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Multi Perangkat</h3>
+        <p class="text-slate-500 leading-relaxed">Akses perpustakaan Anda dari laptop, tablet, atau smartphone dengan
+            mudah.</p>
     </div>
 </div>
 
-<!-- Catalog Section -->
-<section id="katalog" class="scroll-mt-24">
-    <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+<!-- Best Sellers Section -->
+<section class="mb-20">
+    <div class="flex justify-between items-end mb-10">
         <div>
-            <h2 class="text-3xl font-bold text-slate-900 mb-4">Katalog Buku Pilihan</h2>
-            <p class="text-slate-500 text-lg">Temukan buku favoritmu dari berbagai kategori menarik.</p>
+            <h2 class="text-3xl font-bold text-slate-900 mb-2">Paling Diminati</h2>
+            <p class="text-slate-500">Buku-buku yang sedang hangat dibicarakan minggu ini.</p>
         </div>
-        <div class="hidden md:block">
-            <!-- Optional Filter or Sort could go here -->
-        </div>
+        <a href="index.php?page=catalog" class="text-primary font-bold hover:text-amber-600 transition-colors">Lihat
+            Semua &rarr;</a>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        <?php foreach ($books as $book): ?>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <?php foreach ($best_sellers as $book): ?>
             <div
-                class="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-2xl hover:border-amber-200 transition-all duration-300 flex flex-col h-full">
-                <a href="index.php?page=detail&id=<?= $book['id'] ?>"
-                    class="relative block overflow-hidden aspect-[3/4] bg-slate-100">
+                class="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-2xl transition-all flex flex-col">
+                <div class="relative aspect-[4/3] bg-slate-100 overflow-hidden">
                     <img src="assets/images/<?= htmlspecialchars($book['image']) ?>"
-                        alt="<?= htmlspecialchars($book['title']) ?>"
-                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-
-                    <!-- Overlay Gradient -->
-                    <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    </div>
-
-                    <div
-                        class="absolute bottom-4 left-4 right-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                        <span
-                            class="inline-block px-4 py-2 bg-white/90 backdrop-blur text-slate-900 text-sm font-bold rounded-full">
-                            Lihat Detail
-                        </span>
-                    </div>
-                </a>
-
-                <div class="p-6 flex flex-col flex-1">
-                    <div class="mb-4">
-                        <h3
-                            class="text-lg font-bold text-slate-900 leading-tight mb-1 line-clamp-1 group-hover:text-primary transition-colors">
-                            <a
-                                href="index.php?page=detail&id=<?= $book['id'] ?>"><?= htmlspecialchars($book['title']) ?></a>
-                        </h3>
-                        <p class="text-slate-500 text-sm"><?= htmlspecialchars($book['author']) ?></p>
-                    </div>
-
-                    <div class="mt-auto flex items-center justify-between pt-4 border-t border-slate-50">
-                        <div>
-                            <span class="block text-xs text-slate-400 uppercase font-bold tracking-wider">Harga</span>
-                            <span class="text-lg font-extrabold text-primary">🪙 <?= number_format($book['price']) ?></span>
-                        </div>
-                        <?php if (!isAdmin()): ?>
-                            <form action="index.php?page=cart_action" method="POST">
-                                <input type="hidden" name="action" value="add">
-                                <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
-                                <button type="submit"
-                                    class="w-10 h-10 rounded-full bg-slate-50 text-slate-700 flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4" />
-                                    </svg>
-                                </button>
-                            </form>
-                        <?php endif; ?>
+                        class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                        alt="<?= htmlspecialchars($book['title']) ?>">
+                    <span
+                        class="absolute top-4 left-4 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Best
+                        Seller</span>
+                </div>
+                <div class="p-6 flex-1 flex flex-col">
+                    <h3 class="font-bold text-xl text-slate-900 mb-2 line-clamp-1"><?= htmlspecialchars($book['title']) ?>
+                    </h3>
+                    <p class="text-slate-500 text-sm mb-4 line-clamp-2"><?= htmlspecialchars($book['description']) ?></p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span class="font-extrabold text-primary text-lg">🪙 <?= number_format($book['price']) ?></span>
+                        <a href="index.php?page=detail&id=<?= $book['id'] ?>"
+                            class="text-sm font-bold text-slate-900 underline decoration-2 decoration-primary hover:decoration-amber-600">Detail</a>
                     </div>
                 </div>
             </div>
         <?php endforeach; ?>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="bg-slate-900 rounded-3xl p-12 md:p-20 text-center relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+    <div class="relative z-10 max-w-2xl mx-auto">
+        <h2 class="text-4xl font-extrabold text-white mb-6">Siap Memulai Petualangan?</h2>
+        <p class="text-slate-400 text-lg mb-10">Bergabunglah dengan ribuan pembaca lainnya dan bangun perpustakaan
+            digital impianmu sekarang juga.</p>
+        <a href="index.php?page=catalog"
+            class="inline-block px-10 py-4 bg-white text-slate-900 font-bold rounded-full shadow-xl hover:bg-amber-50 transition-colors text-lg">
+            Jelajahi Sekarang
+        </a>
     </div>
 </section>
