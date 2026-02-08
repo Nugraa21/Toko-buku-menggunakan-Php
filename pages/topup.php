@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
                 <form id="topupForm" class="relative z-10" onsubmit="event.preventDefault(); showPaymentModal();">
 
                     <!-- Packages Grid -->
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
                         <?php
                         $packages = [
                             ['amount' => 50, 'price' => 50000, 'popular' => false, 'tier' => 'STARTER', 'color' => 'slate'],
@@ -89,44 +89,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
                         ];
 
                         $colors = [
-                            'slate' => 'bg-slate-50 border-slate-100 peer-checked:bg-slate-900 peer-checked:text-white',
-                            'blue' => 'bg-blue-50/50 border-blue-100 peer-checked:bg-blue-600 peer-checked:text-white',
-                            'indigo' => 'bg-indigo-50/50 border-indigo-100 peer-checked:bg-indigo-600 peer-checked:text-white',
-                            'purple' => 'bg-purple-50/50 border-purple-100 peer-checked:bg-purple-600 peer-checked:text-white',
-                            'rose' => 'bg-rose-50/50 border-rose-100 peer-checked:bg-rose-600 peer-checked:text-white',
-                            'amber' => 'bg-amber-50/50 border-amber-100 peer-checked:bg-amber-500 peer-checked:text-white',
+                            'slate' => 'bg-slate-50 border-slate-100 peer-checked:bg-slate-900 peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-slate-900/20 peer-checked:border-slate-900',
+                            'blue' => 'bg-blue-50/50 border-blue-100 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-blue-600/30 peer-checked:border-blue-600',
+                            'indigo' => 'bg-indigo-50/50 border-indigo-100 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-indigo-600/30 peer-checked:border-indigo-600',
+                            'purple' => 'bg-purple-50/50 border-purple-100 peer-checked:bg-purple-600 peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-purple-600/30 peer-checked:border-purple-600',
+                            'rose' => 'bg-rose-50/50 border-rose-100 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-rose-600/30 peer-checked:border-rose-600',
+                            'amber' => 'bg-amber-50/50 border-amber-100 peer-checked:bg-amber-500 peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-amber-500/30 peer-checked:border-amber-500',
                         ];
 
                         foreach ($packages as $pkg):
                             $activeClass = $colors[$pkg['color']];
                             ?>
-                            <label class="cursor-pointer group relative">
+                            <label
+                                class="cursor-pointer group relative transform transition-all duration-300 hover:-translate-y-1">
                                 <input type="radio" name="selected_amount" value="<?= $pkg['amount'] ?>"
                                     class="peer sr-only" onchange="updateCustomAmount(this.value)">
 
                                 <div
-                                    class="h-full p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center justify-center text-center gap-2 hover:shadow-xl hover:-translate-y-1 <?= $activeClass ?>">
+                                    class="h-full p-6 md:p-8 rounded-[2rem] border-2 transition-all duration-300 flex flex-col items-center justify-center text-center gap-2 hover:shadow-lg <?= $activeClass ?>">
 
                                     <?php if ($pkg['popular']): ?>
                                         <div
-                                            class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg shadow-orange-500/30 uppercase tracking-widest z-10 w-max">
+                                            class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-lg shadow-orange-500/30 uppercase tracking-widest z-10 w-max border-2 border-white">
                                             Best Seller
                                         </div>
                                     <?php endif; ?>
 
                                     <div
-                                        class="text-[10px] font-bold border border-current rounded-full px-2 py-0.5 opacity-60 uppercase tracking-widest mb-1 group-hover:opacity-100 transition-opacity">
+                                        class="text-[10px] font-bold border border-current rounded-full px-3 py-1 opacity-60 uppercase tracking-widest mb-1 group-hover:opacity-100 transition-opacity">
                                         <?= $pkg['tier'] ?>
                                     </div>
 
                                     <div class="flex items-baseline gap-1">
                                         <span
-                                            class="text-4xl font-serif font-bold tracking-tight"><?= $pkg['amount'] ?></span>
+                                            class="text-4xl md:text-5xl font-serif font-bold tracking-tight"><?= $pkg['amount'] ?></span>
                                         <span class="text-xs font-bold opacity-60">TKN</span>
                                     </div>
 
                                     <div
-                                        class="mt-2 text-sm font-bold bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 w-full">
+                                        class="mt-3 text-sm font-bold bg-white/20 backdrop-blur-md rounded-xl px-4 py-2 w-full border border-white/20">
                                         Rp <?= number_format($pkg['price'], 0, ',', '.') ?>
                                     </div>
                                 </div>
@@ -287,66 +288,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
     <div
         class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-6xl h-[90vh] md:h-[800px] bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up flex flex-col md:flex-row border border-slate-200">
 
-        <!-- Sidebar: Payment Methods (Left) -->
-        <div class="w-full md:w-[350px] bg-slate-50 border-r border-slate-200 flex flex-col flex-shrink-0">
-            <div class="p-6 border-b border-slate-200/60 bg-white">
-                <h3 class="font-bold text-slate-900 mb-1">Metode Pembayaran</h3>
-                <p class="text-xs text-slate-500 font-medium">Pilih salah satu metode yang tersedia</p>
+        <!-- Sidebar: Payment Methods (Left/Top) -->
+        <div
+            class="w-full md:w-[350px] bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 flex flex-col flex-shrink-0 h-[35%] md:h-full">
+            <div class="p-4 md:p-6 border-b border-slate-200/60 bg-white md:bg-transparent sticky top-0 z-10">
+                <h3 class="font-bold text-slate-900 mb-0.5 text-sm md:text-base">Metode Pembayaran</h3>
+                <p class="text-[10px] md:text-xs text-slate-500 font-medium hidden md:block">Pilih salah satu metode
+                    yang tersedia</p>
             </div>
 
-            <div class="flex-grow overflow-y-auto custom-scrollbar p-4 space-y-6">
+            <div class="flex-grow overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-4 md:space-y-6">
 
                 <!-- Section: Virtual Accounts -->
                 <div>
                     <p class="px-2 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Virtual Account
                     </p>
-                    <div class="space-y-2">
+                    <div class="space-y-2 grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-0">
                         <!-- BCA -->
                         <button onclick="selectMethod(this, 'bca')"
-                            class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            class="w-full p-2.5 md:p-3 flex items-center gap-3 md:gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95">
                             <div
-                                class="w-12 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                                class="w-10 h-7 md:w-12 md:h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
                                 BCA</div>
-                            <div class="flex-grow relative z-10">
-                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">BCA
-                                    Virtual Account</span>
-                                <span class="block text-[10px] text-slate-400">Verifikasi Otomatis</span>
+                            <div class="flex-grow relative z-10 min-w-0">
+                                <span
+                                    class="block font-bold text-slate-700 text-xs md:text-sm group-hover:text-primary truncate">BCA
+                                    VA</span>
+                                <span class="block text-[8px] md:text-[10px] text-slate-400 truncate">Verifikasi
+                                    Otomatis</span>
                             </div>
                         </button>
                         <!-- Mandiri -->
                         <button onclick="selectMethod(this, 'mandiri')"
-                            class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            class="w-full p-2.5 md:p-3 flex items-center gap-3 md:gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95">
                             <div
-                                class="w-12 h-8 bg-blue-900 rounded flex items-center justify-center text-yellow-400 font-bold text-[10px] flex-shrink-0 border-b-4 border-yellow-400">
+                                class="w-10 h-7 md:w-12 md:h-8 bg-blue-900 rounded flex items-center justify-center text-yellow-400 font-bold text-[10px] flex-shrink-0 border-b-4 border-yellow-400">
                                 BMRI</div>
-                            <div class="flex-grow relative z-10">
-                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">Mandiri
+                            <div class="flex-grow relative z-10 min-w-0">
+                                <span
+                                    class="block font-bold text-slate-700 text-xs md:text-sm group-hover:text-primary truncate">Mandiri
                                     VA</span>
-                                <span class="block text-[10px] text-slate-400">Verifikasi Otomatis</span>
+                                <span class="block text-[8px] md:text-[10px] text-slate-400 truncate">Verifikasi
+                                    Otomatis</span>
                             </div>
                         </button>
                         <!-- BRI -->
                         <button onclick="selectMethod(this, 'bri')"
-                            class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            class="w-full p-2.5 md:p-3 flex items-center gap-3 md:gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95">
                             <div
-                                class="w-12 h-8 bg-blue-700 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                                class="w-10 h-7 md:w-12 md:h-8 bg-blue-700 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
                                 BRI</div>
-                            <div class="flex-grow relative z-10">
+                            <div class="flex-grow relative z-10 min-w-0">
                                 <span
-                                    class="block font-bold text-slate-700 text-sm group-hover:text-primary">BRIVA</span>
-                                <span class="block text-[10px] text-slate-400">Verifikasi Otomatis</span>
+                                    class="block font-bold text-slate-700 text-xs md:text-sm group-hover:text-primary truncate">BRIVA</span>
+                                <span class="block text-[8px] md:text-[10px] text-slate-400 truncate">Verifikasi
+                                    Otomatis</span>
                             </div>
                         </button>
                         <!-- BNI -->
                         <button onclick="selectMethod(this, 'bni')"
-                            class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            class="w-full p-2.5 md:p-3 flex items-center gap-3 md:gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95">
                             <div
-                                class="w-12 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                                class="w-10 h-7 md:w-12 md:h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
                                 BNI</div>
-                            <div class="flex-grow relative z-10">
-                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">BNI
+                            <div class="flex-grow relative z-10 min-w-0">
+                                <span
+                                    class="block font-bold text-slate-700 text-xs md:text-sm group-hover:text-primary truncate">BNI
                                     VA</span>
-                                <span class="block text-[10px] text-slate-400">Verifikasi Otomatis</span>
+                                <span class="block text-[8px] md:text-[10px] text-slate-400 truncate">Verifikasi
+                                    Otomatis</span>
                             </div>
                         </button>
                     </div>
@@ -357,29 +367,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
                     <p
                         class="px-2 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-t border-slate-200 pt-4">
                         E-Wallet & QRIS</p>
-                    <div class="space-y-2">
+                    <div class="space-y-2 grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-0">
                         <!-- QRIS -->
                         <button onclick="selectMethod(this, 'qris')"
-                            class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            class="w-full p-2.5 md:p-3 flex items-center gap-3 md:gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95">
                             <div
-                                class="w-12 h-8 bg-slate-800 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                                class="w-10 h-7 md:w-12 md:h-8 bg-slate-800 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
                                 QRIS</div>
-                            <div class="flex-grow relative z-10">
+                            <div class="flex-grow relative z-10 min-w-0">
                                 <span
-                                    class="block font-bold text-slate-700 text-sm group-hover:text-primary">QRIS</span>
-                                <span class="block text-[10px] text-slate-400">Gopay, OVO, Dana, LinkAja</span>
+                                    class="block font-bold text-slate-700 text-xs md:text-sm group-hover:text-primary truncate">QRIS</span>
+                                <span class="block text-[8px] md:text-[10px] text-slate-400 truncate">Scan & Pay</span>
                             </div>
                         </button>
                         <!-- ShopeePay -->
                         <button onclick="selectMethod(this, 'shopeepay')"
-                            class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            class="w-full p-2.5 md:p-3 flex items-center gap-3 md:gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95">
                             <div
-                                class="w-12 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                                class="w-10 h-7 md:w-12 md:h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
                                 SPay</div>
-                            <div class="flex-grow relative z-10">
+                            <div class="flex-grow relative z-10 min-w-0">
                                 <span
-                                    class="block font-bold text-slate-700 text-sm group-hover:text-primary">ShopeePay</span>
-                                <span class="block text-[10px] text-slate-400">App Redirect</span>
+                                    class="block font-bold text-slate-700 text-xs md:text-sm group-hover:text-primary truncate">ShopeePay</span>
+                                <span class="block text-[8px] md:text-[10px] text-slate-400 truncate">App
+                                    Redirect</span>
                             </div>
                         </button>
                     </div>
@@ -390,31 +401,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
                     <p
                         class="px-2 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-t border-slate-200 pt-4">
                         Gerai Retail</p>
-                    <div class="space-y-2">
+                    <div class="space-y-2 grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-0">
                         <!-- Indomaret -->
                         <button onclick="selectMethod(this, 'indomaret')"
-                            class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            class="w-full p-2.5 md:p-3 flex items-center gap-3 md:gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95">
                             <div
-                                class="w-12 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 border-b-2 border-red-500 relative">
-                                <span class="absolute top-0 w-full h-1/3 bg-red-500"></span>Ind</div>
-                            <div class="flex-grow relative z-10">
+                                class="w-10 h-7 md:w-12 md:h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 border-b-2 border-red-500 relative">
+                                <span class="absolute top-0 w-full h-1/3 bg-red-500"></span>Ind
+                            </div>
+                            <div class="flex-grow relative z-10 min-w-0">
                                 <span
-                                    class="block font-bold text-slate-700 text-sm group-hover:text-primary">Indomaret</span>
-                                <span class="block text-[10px] text-slate-400">Bayar di Kasir</span>
+                                    class="block font-bold text-slate-700 text-xs md:text-sm group-hover:text-primary truncate">Indomaret</span>
+                                <span class="block text-[8px] md:text-[10px] text-slate-400 truncate">Bayar di
+                                    Kasir</span>
                             </div>
                         </button>
                         <!-- Alfamart -->
                         <button onclick="selectMethod(this, 'alfamart')"
-                            class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            class="w-full p-2.5 md:p-3 flex items-center gap-3 md:gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95">
                             <div
-                                class="w-12 h-8 bg-red-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 relative overflow-hidden">
+                                class="w-10 h-7 md:w-12 md:h-8 bg-red-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 relative overflow-hidden">
                                 <span
                                     class="absolute right-0 w-1/3 h-full bg-yellow-400 transform skew-x-12"></span>Alfa
                             </div>
-                            <div class="flex-grow relative z-10">
+                            <div class="flex-grow relative z-10 min-w-0">
                                 <span
-                                    class="block font-bold text-slate-700 text-sm group-hover:text-primary">Alfamart</span>
-                                <span class="block text-[10px] text-slate-400">Bayar di Kasir</span>
+                                    class="block font-bold text-slate-700 text-xs md:text-sm group-hover:text-primary truncate">Alfamart</span>
+                                <span class="block text-[8px] md:text-[10px] text-slate-400 truncate">Bayar di
+                                    Kasir</span>
                             </div>
                         </button>
                     </div>
@@ -423,14 +437,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
             </div>
         </div>
 
-        <!-- Main Content: Details (Right) -->
-        <div class="flex-grow bg-white flex flex-col relative">
+        <!-- Main Content: Details (Right/Bottom) -->
+        <div class="flex-grow bg-white flex flex-col relative h-[65%] md:h-auto">
 
             <!-- Top Bar -->
-            <div class="h-20 border-b border-slate-100 flex items-center justify-between px-8 bg-white z-20">
+            <div
+                class="h-16 md:h-20 border-b border-slate-100 flex items-center justify-between px-6 md:px-8 bg-white z-20 flex-shrink-0">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pembayaran</p>
-                    <h2 class="text-2xl font-black text-slate-900 font-serif leading-none mt-1" id="gatewayAmount">Rp 0
+                    <h2 class="text-xl md:text-2xl font-black text-slate-900 font-serif leading-none mt-1"
+                        id="gatewayAmount">Rp 0
                     </h2>
                 </div>
                 <button onclick="closePaymentModal()"
