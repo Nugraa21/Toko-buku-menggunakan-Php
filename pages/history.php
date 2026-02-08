@@ -18,7 +18,7 @@ $transactions = $stmt->fetchAll();
 <div class="max-w-5xl mx-auto">
     <div class="flex items-center justify-between mb-8">
         <div>
-            <h2 class="text-3xl font-bold text-slate-900">Riwayat Pembelian</h2>
+            <h2 class="text-3xl font-serif font-bold text-slate-900">Riwayat Pembelian</h2>
             <p class="text-slate-500 mt-1">Daftar semua buku yang telah Anda beli.</p>
         </div>
         <div class="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm text-sm text-slate-600">

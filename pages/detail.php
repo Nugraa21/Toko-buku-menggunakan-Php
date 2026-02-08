@@ -17,18 +17,18 @@ if (!$book) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review']) && !isAdmin()) {
     $rating = intval($_POST['rating']);
     $comment = trim($_POST['comment']);
-    
+
     // Check if user has bought this book (Optional logic: strict mode? User didn't specify strict mode, so allowed for now or check transaction?)
     // "untuk users bisa kasih ulasan dan reting di bukunya" - usually implies ownership logic. 
     // Let's assume anyone can review for simplicity unless specific 'bought only' requested.
     // BUT, usually best practice is logged in users.
-    
+
     if ($rating >= 1 && $rating <= 5 && !empty($comment)) {
         $stmtr = $pdo->prepare("INSERT INTO reviews (user_id, book_id, rating, comment) VALUES (?, ?, ?, ?)");
         $stmtr->execute([$_SESSION['user_id'], $id, $rating, $comment]);
         $_SESSION['flash_message'] = "Ulasan berhasil dikirim!";
         $_SESSION['flash_type'] = "success";
-        
+
         // Refresh to prevent resubmission
         header("Location: " . $_SERVER['REQUEST_URI']);
         exit();
@@ -51,8 +51,10 @@ $reviews = $stmt_rev->fetchAll();
     <div class="md:flex">
         <!-- Image Section -->
         <div class="md:w-1/3 bg-slate-50 p-8 flex items-center justify-center">
-            <div class="relative w-full aspect-[3/4] max-w-sm shadow-2xl rounded-2xl overflow-hidden transform transition duration-500 hover:scale-105">
-                <img src="assets/images/<?= htmlspecialchars($book['image']) ?>" alt="<?= htmlspecialchars($book['title']) ?>" class="absolute inset-0 w-full h-full object-cover">
+            <div
+                class="relative w-full aspect-[3/4] max-w-sm shadow-book rounded-2xl overflow-hidden transform transition duration-500 hover:scale-105">
+                <img src="assets/images/<?= htmlspecialchars($book['image']) ?>"
+                    alt="<?= htmlspecialchars($book['title']) ?>" class="absolute inset-0 w-full h-full object-cover">
             </div>
         </div>
 
@@ -60,13 +62,17 @@ $reviews = $stmt_rev->fetchAll();
         <div class="md:w-2/3 p-8 md:p-12 flex flex-col justify-between">
             <div>
                 <div class="flex items-center gap-2 mb-4">
-                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wide rounded-full">Buku Digital</span>
-                    <?php if($book['stock'] < 5): ?>
-                        <span class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-wide rounded-full">Stok Terbatas</span>
+                    <span
+                        class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wide rounded-full">Buku
+                        Digital</span>
+                    <?php if ($book['stock'] < 5): ?>
+                        <span
+                            class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-wide rounded-full">Stok
+                            Terbatas</span>
                     <?php endif; ?>
                 </div>
 
-                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-2 leading-tight">
+                <h1 class="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-2 leading-tight">
                     <?= htmlspecialchars($book['title']) ?>
                 </h1>
                 <p class="text-xl text-slate-500 font-medium mb-8">
@@ -84,24 +90,29 @@ $reviews = $stmt_rev->fetchAll();
                     <div>
                         <p class="text-sm text-slate-400 font-medium uppercase tracking-wider">Harga Buku</p>
                         <div class="flex items-baseline gap-1">
-                            <span class="text-4xl font-extrabold text-primary"><?= number_format($book['price']) ?></span>
+                            <span
+                                class="text-4xl font-serif font-bold text-primary"><?= number_format($book['price']) ?></span>
                             <span class="text-lg text-slate-600 font-bold">Token</span>
                         </div>
                     </div>
 
                     <?php if (!isAdmin()): ?>
-                    <form action="index.php?page=cart_action" method="POST" class="w-full sm:w-auto">
-                        <input type="hidden" name="action" value="add">
-                        <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
-                        <button type="submit" class="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Tambah ke Keranjang
-                        </button>
-                    </form>
+                        <form action="index.php?page=cart_action" method="POST" class="w-full sm:w-auto">
+                            <input type="hidden" name="action" value="add">
+                            <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
+                            <button type="submit"
+                                class="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Tambah ke Keranjang
+                            </button>
+                        </form>
                     <?php else: ?>
-                        <div class="w-full sm:w-auto px-8 py-4 bg-slate-200 text-slate-500 rounded-xl font-bold text-lg text-center cursor-not-allowed">
+                        <div
+                            class="w-full sm:w-auto px-8 py-4 bg-slate-200 text-slate-500 rounded-xl font-bold text-lg text-center cursor-not-allowed">
                             Admin Only View
                         </div>
                     <?php endif; ?>
@@ -115,55 +126,71 @@ $reviews = $stmt_rev->fetchAll();
 <div class="max-w-4xl mx-auto">
     <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-8">
         <h3 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            ⭐ Ulasan Pembaca <span class="text-slate-400 text-lg font-normal">(<?= count($reviews) ?>)</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-500" viewBox="0 0 20 20"
+                fill="currentColor">
+                <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            Ulasan Pembaca <span class="text-slate-400 text-lg font-normal">(<?= count($reviews) ?>)</span>
         </h3>
 
         <!-- Review Form -->
         <?php if (!isAdmin() && isLoggedIn()): ?>
-        <div class="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-200">
-            <h4 class="font-bold text-slate-800 mb-4">Tulis Ulasan Anda</h4>
-            <form method="POST">
-                <input type="hidden" name="submit_review" value="1">
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Rating</label>
-                    <div class="flex gap-2 text-2xl text-slate-300">
-                        <!-- Simple star rating via radio buttons style could be complex, using select for simplicity but styling it nicely -->
-                        <select name="rating" class="px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-primary">
-                            <option value="5">⭐⭐⭐⭐⭐ (Sempurna)</option>
-                            <option value="4">⭐⭐⭐⭐ (Bagus)</option>
-                            <option value="3">⭐⭐⭐ (Cukup)</option>
-                            <option value="2">⭐⭐ (Kurang)</option>
-                            <option value="1">⭐ (Buruk)</option>
-                        </select>
+            <div class="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-200">
+                <h4 class="font-bold text-slate-800 mb-4">Tulis Ulasan Anda</h4>
+                <form method="POST">
+                    <input type="hidden" name="submit_review" value="1">
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Rating</label>
+                        <div class="flex gap-2 text-2xl text-slate-300">
+                            <!-- Simple star rating via radio buttons style could be complex, using select for simplicity but styling it nicely -->
+                            <select name="rating"
+                                class="px-4 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-primary">
+                                <option value="5">5 Bintang (Sempurna)</option>
+                                <option value="4">4 Bintang (Bagus)</option>
+                                <option value="3">3 Bintang (Cukup)</option>
+                                <option value="2">2 Bintang (Kurang)</option>
+                                <option value="1">1 Bintang (Buruk)</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Komentar</label>
-                    <textarea name="comment" rows="3" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Bagaimana pendapatmu tentang buku ini?" required></textarea>
-                </div>
-                <button type="submit" class="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-amber-600 transition-colors">
-                    Kirim Ulasan
-                </button>
-            </form>
-        </div>
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Komentar</label>
+                        <textarea name="comment" rows="3"
+                            class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            placeholder="Bagaimana pendapatmu tentang buku ini?" required></textarea>
+                    </div>
+                    <button type="submit"
+                        class="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-amber-600 transition-colors">
+                        Kirim Ulasan
+                    </button>
+                </form>
+            </div>
         <?php endif; ?>
 
         <!-- Reviews List -->
         <div class="space-y-6">
-            <?php if(empty($reviews)): ?>
+            <?php if (empty($reviews)): ?>
                 <p class="text-slate-500 italic text-center py-4">Belum ada ulasan untuk buku ini.</p>
             <?php else: ?>
-                <?php foreach($reviews as $r): ?>
+                <?php foreach ($reviews as $r): ?>
                     <div class="border-b border-slate-100 pb-6 last:border-0 last:pb-0">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
                                     <?= substr($r['name'], 0, 1) ?>
                                 </div>
                                 <div>
                                     <h5 class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($r['name']) ?></h5>
-                                    <div class="text-amber-500 text-xs">
-                                        <?= str_repeat('⭐', $r['rating']) ?>
+                                    <div class="text-amber-500 text-xs flex">
+                                        <?php for ($i = 0; $i < $r['rating']; $i++): ?>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                                fill="currentColor">
+                                                <path
+                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        <?php endfor; ?>
                                     </div>
                                 </div>
                             </div>
