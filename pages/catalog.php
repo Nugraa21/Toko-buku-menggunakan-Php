@@ -1,8 +1,33 @@
 <?php
-// Simple Search
+// Fetch Categories
+$categories = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll();
+
+// Filter Logic
 $search = $_GET['search'] ?? '';
-$query = "SELECT * FROM books WHERE title LIKE ? OR author LIKE ? ORDER BY created_at DESC";
-$params = ["%$search%", "%$search%"];
+$category_slug = $_GET['category'] ?? '';
+
+$query = "SELECT b.*, c.name as category_name FROM books b LEFT JOIN categories c ON b.category_id = c.id WHERE 1=1";
+$params = [];
+
+if (!empty($search)) {
+    $query .= " AND (b.title LIKE ? OR b.author LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+}
+
+if (!empty($category_slug)) {
+    // Find category id by slug
+    $catStmt = $pdo->prepare("SELECT id FROM categories WHERE slug = ?");
+    $catStmt->execute([$category_slug]);
+    $catId = $catStmt->fetchColumn();
+
+    if ($catId) {
+        $query .= " AND b.category_id = ?";
+        $params[] = $catId;
+    }
+}
+
+$query .= " ORDER BY b.created_at DESC";
 
 $stmt = $pdo->prepare($query);
 $stmt->execute($params);
@@ -10,10 +35,9 @@ $books = $stmt->fetchAll();
 ?>
 
 <div class="max-w-7xl mx-auto">
-    <!-- Search Header -->
-    <!-- Search Header -->
+    <!-- Header Section -->
     <div
-        class="bg-secondary rounded-[2.5rem] p-10 md:p-14 mb-16 text-center relative overflow-hidden shadow-2xl shadow-secondary/20">
+        class="bg-secondary rounded-[2.5rem] p-8 md:p-12 mb-12 text-center relative overflow-hidden shadow-2xl shadow-secondary/20">
         <!-- Abstract Decoration -->
         <div
             class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none">
@@ -25,12 +49,18 @@ $books = $stmt->fetchAll();
         <h2 class="text-3xl md:text-5xl font-serif font-bold text-white mb-8 relative z-10 leading-tight">
             Katalog Buku Lengkap
         </h2>
-        <form method="GET" class="max-w-xl mx-auto relative z-10 flex gap-2">
+
+        <!-- Search Form -->
+        <form method="GET" class="max-w-xl mx-auto relative z-10 flex gap-2 mb-8">
             <input type="hidden" name="page" value="catalog">
+            <?php if (!empty($category_slug)): ?>
+                <input type="hidden" name="category" value="<?= htmlspecialchars($category_slug) ?>">
+            <?php endif; ?>
+
             <div class="relative flex-1">
                 <input type="text" name="search" value="<?= htmlspecialchars($search) ?>"
                     placeholder="Cari judul buku atau penulis..."
-                    class="w-full pl-12 pr-4 py-4 rounded-full border-none focus:ring-2 focus:ring-primary text-slate-800 font-medium placeholder-slate-400 shadow-xl">
+                    class="w-full pl-12 pr-4 py-4 rounded-full border-none focus:ring-4 focus:ring-primary/30 text-slate-800 font-medium placeholder-slate-400 shadow-xl transition-all outline-none">
                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -40,38 +70,71 @@ $books = $stmt->fetchAll();
                 </div>
             </div>
             <button type="submit"
-                class="px-6 py-4 bg-primary text-white font-bold rounded-full hover:bg-amber-600 transition-colors shadow-lg">
+                class="px-8 py-4 bg-primary text-white font-bold rounded-full hover:bg-amber-600 transition-colors shadow-lg shadow-primary/30">
                 Cari
             </button>
         </form>
+
+        <!-- Category Pills (Horizontal Scroll) -->
+        <div class="relative z-10 max-w-4xl mx-auto">
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="index.php?page=catalog"
+                    class="px-5 py-2 rounded-full text-sm font-bold transition-all border <?= empty($category_slug) ? 'bg-white text-secondary border-white shadow-lg transform scale-105' : 'bg-white/10 text-white/70 border-white/10 hover:bg-white/20 hover:text-white' ?>">
+                    Semua
+                </a>
+                <?php foreach ($categories as $cat): ?>
+                    <a href="index.php?page=catalog&category=<?= $cat['slug'] ?>"
+                        class="px-5 py-2 rounded-full text-sm font-bold transition-all border <?= $category_slug === $cat['slug'] ? 'bg-white text-secondary border-white shadow-lg transform scale-105' : 'bg-white/10 text-white/70 border-white/10 hover:bg-white/20 hover:text-white' ?>">
+                        <?= htmlspecialchars($cat['name']) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
     </div>
 
     <!-- Results -->
     <?php if (empty($books)): ?>
-        <div class="text-center py-20">
-            <p class="text-2xl text-slate-300 font-bold mb-2">Oops!</p>
-            <p class="text-slate-500">Tidak ada buku yang cocok dengan pencarian "
-                <?= htmlspecialchars($search) ?>"
+        <div class="text-center py-20 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
+            <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+            </div>
+            <p class="text-2xl text-slate-800 font-bold mb-2">Tidak ada buku ditemukan</p>
+            <p class="text-slate-500 max-w-md mx-auto">
+                Coba cari dengan kata kunci lain atau pilih kategori yang berbeda.
             </p>
-            <a href="index.php?page=catalog" class="inline-block mt-4 text-primary font-bold hover:underline">Reset
-                Pencarian</a>
+            <a href="index.php?page=catalog"
+                class="inline-block mt-6 px-6 py-2 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-colors">
+                Reset Filter
+            </a>
         </div>
     <?php else: ?>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 mb-12">
             <?php foreach ($books as $book): ?>
                 <div class="group relative">
                     <!-- Book Card -->
                     <div
-                        class="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100 hover:shadow-book-hover transition-all duration-500 flex flex-col h-full relative z-10">
+                        class="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100 hover:shadow-book-hover hover:-translate-y-2 transition-all duration-500 flex flex-col h-full relative z-10 group-hover:border-primary/20">
 
                         <!-- Image Container with 3D Effect -->
                         <div
-                            class="relative aspect-[2/3] rounded-2xl overflow-hidden mb-6 shadow-book group-hover:shadow-2xl transition-all duration-500">
-                            <!-- Badge -->
+                            class="relative aspect-[2/3] rounded-2xl overflow-hidden mb-6 shadow-book group-hover:shadow-2xl transition-all duration-500 bg-slate-100">
+                            <!-- Stock Badge -->
                             <?php if ($book['stock'] < 5): ?>
                                 <div
-                                    class="absolute top-3 left-3 px-3 py-1 bg-rose-500/90 backdrop-blur text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-lg z-20">
+                                    class="absolute top-3 left-3 px-3 py-1 bg-rose-500/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-lg z-20">
                                     Sisa <?= $book['stock'] ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Category Badge -->
+                            <?php if (!empty($book['category_name'])): ?>
+                                <div
+                                    class="absolute top-3 right-3 px-3 py-1 bg-slate-900/40 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm z-20">
+                                    <?= htmlspecialchars($book['category_name']) ?>
                                 </div>
                             <?php endif; ?>
 
@@ -86,17 +149,11 @@ $books = $stmt->fetchAll();
 
                             <!-- Floating Action Button (Quick View) -->
                             <a href="index.php?page=detail&id=<?= $book['id'] ?>"
-                                class="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                <div
-                                    class="w-14 h-14 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center text-white transform translate-y-4 group-hover:translate-y-0 transition-all hover:bg-white hover:text-primary shadow-xl">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </div>
+                                class="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] bg-black/10">
+                                <span
+                                    class="px-6 py-2 bg-white text-slate-900 font-bold rounded-full shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all hover:scale-105 hover:bg-primary hover:text-white">
+                                    Lihat Detail
+                                </span>
                             </a>
                         </div>
 
@@ -109,14 +166,15 @@ $books = $stmt->fetchAll();
                                         <?= htmlspecialchars($book['title']) ?>
                                     </a>
                                 </h3>
-                                <p class="text-slate-500 text-sm italic font-sans">
-                                    by <?= htmlspecialchars($book['author']) ?>
-                                </p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-slate-500 text-sm italic font-sans truncate">
+                                        <?= htmlspecialchars($book['author']) ?>
+                                    </p>
+                                </div>
                             </div>
 
-                            <div class="mt-auto pt-4 border-t border-slate-50 flex items-end justify-between gap-4">
+                            <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between gap-4">
                                 <div>
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Harga</p>
                                     <div class="flex items-center gap-1.5 text-primary">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                             fill="currentColor">
@@ -135,12 +193,13 @@ $books = $stmt->fetchAll();
                                         <input type="hidden" name="action" value="add">
                                         <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
                                         <button type="submit"
-                                            class="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-accent transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 group/btn">
+                                            class="w-10 h-10 rounded-full bg-slate-900 border border-slate-700 text-white flex items-center justify-center hover:bg-primary hover:border-primary transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 group/btn"
+                                            title="Tambah ke Keranjang">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                 class="h-5 w-5 transform group-hover/btn:scale-110 transition-transform" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 4v16m8-8H4" />
+                                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                             </svg>
                                         </button>
                                     </form>

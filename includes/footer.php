@@ -70,16 +70,16 @@
                     <span class="absolute -bottom-2 left-0 w-1/2 h-0.5 bg-primary"></span>
                 </h3>
                 <ul class="space-y-4">
-                    <li><a href="#"
+                    <li><a href="index.php?page=cara_pembelian"
                             class="text-slate-400 hover:text-primary transition-colors hover:translate-x-1 inline-block">Cara
                             Pembelian</a></li>
-                    <li><a href="index.php?page=topup"
+                    <li><a href="index.php?page=topup_guide"
                             class="text-slate-400 hover:text-primary transition-colors hover:translate-x-1 inline-block">Top
                             Up Token</a></li>
-                    <li><a href="#"
+                    <li><a href="index.php?page=faq"
                             class="text-slate-400 hover:text-primary transition-colors hover:translate-x-1 inline-block">Bantuan
                             / FAQ</a></li>
-                    <li><a href="#"
+                    <li><a href="index.php?page=privacy"
                             class="text-slate-400 hover:text-primary transition-colors hover:translate-x-1 inline-block">Kebijakan
                             Privasi</a></li>
                 </ul>
@@ -118,9 +118,9 @@
                 &copy; <?= date('Y') ?> BookStore Token. All rights reserved.
             </div>
             <div class="flex gap-6 text-sm font-medium text-slate-500">
-                <a href="#" class="hover:text-primary transition-colors">Syarat</a>
-                <a href="#" class="hover:text-primary transition-colors">Privasi</a>
-                <a href="#" class="hover:text-primary transition-colors">Cookies</a>
+                <a href="index.php?page=terms" class="hover:text-primary transition-colors">Syarat</a>
+                <a href="index.php?page=privacy" class="hover:text-primary transition-colors">Privasi</a>
+                <a href="index.php?page=cookies" class="hover:text-primary transition-colors">Cookies</a>
             </div>
         </div>
     </div>
