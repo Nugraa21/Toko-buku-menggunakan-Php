@@ -112,6 +112,39 @@ $top_rated_books = $pdo->query("
         </div>
     </a>
 
+    <!-- Refund Request Card -->
+    <a href="index.php?page=admin_refunds"
+        class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-book-hover transition-all duration-300 group relative overflow-hidden block">
+        <div
+            class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-rose-50 to-transparent rounded-bl-[4rem] -z-0 group-hover:scale-110 transition-transform">
+        </div>
+        <div class="relative z-10 flex items-center gap-4">
+            <div
+                class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shadow-sm group-hover:bg-rose-600 group-hover:text-white transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+            </div>
+            <div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Pengembalian Membadut</p>
+                <div class="flex items-center gap-2">
+                    <p class="text-lg font-serif font-bold text-slate-900 group-hover:text-rose-600 transition-colors">
+                        Manajemen Refund
+                    </p>
+                    <?php
+                    $pending_refunds = $pdo->query("SELECT COUNT(*) FROM refunds WHERE status = 'pending'")->fetchColumn();
+                    if ($pending_refunds > 0):
+                        ?>
+                        <span
+                            class="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-lg animate-pulse"><?= $pending_refunds ?></span>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </a>
+
     <!-- Users Card -->
     <div
         class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-book-hover transition-all duration-300 group relative overflow-hidden">
