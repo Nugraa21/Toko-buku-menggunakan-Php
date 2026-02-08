@@ -41,5 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-redirect('index.php?page=admin');
+$redirect_page = $_POST['redirect'] ?? 'admin';
+redirect('index.php?page=' . $redirect_page);
 ?>

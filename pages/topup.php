@@ -5,31 +5,29 @@ if (!isLoggedIn()) {
 
 // Handle Simulated Payment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) {
+
+    // Simulate Processing Delay
+    sleep(1);
+
     $amount = intval($_POST['amount']);
     if ($amount > 0) {
         try {
-            $pdo->beginTransaction();
+            // 1. Insert into Topups with 'pending' status for admin approval
+            // REAL APPLICATION NOTE: In a real app, you would integrate a Payment Gateway API here (Midtrans, Xendit, Stripe)
+            // status would be set based on the callback from the gateway. 
+            // For this simulator, we set it to 'pending' because it requires manual admin approval as per previous logic.
 
-            // 1. Insert into Topups with 'approved' status
-            // Note: We use 'approved' because the payment is successful
-            $stmt = $pdo->prepare("INSERT INTO topups (user_id, amount, status) VALUES (?, ?, 'approved')");
+            $stmt = $pdo->prepare("INSERT INTO topups (user_id, amount, status) VALUES (?, ?, 'pending')");
             $stmt->execute([$_SESSION['user_id'], $amount]);
 
-            // 2. Update User's Token Balance immediately
-            $updateStmt = $pdo->prepare("UPDATE users SET tokens = tokens + ? WHERE id = ?");
-            $updateStmt->execute([$amount, $_SESSION['user_id']]);
-
-            $pdo->commit();
-
-            $_SESSION['flash_message'] = "Pembayaran Berhasil! $amount Token telah ditambahkan ke akun Anda.";
+            $_SESSION['flash_message'] = "Permintaan Top Up berhasil dibuat. Silakan tunggu konfirmasi Admin.";
             $_SESSION['flash_type'] = "success";
 
             // Refresh to see update
             redirect('index.php?page=topup');
 
         } catch (Exception $e) {
-            $pdo->rollBack();
-            $_SESSION['flash_message'] = "Terjadi kesalahan saat memproses pembayaran: " . $e->getMessage();
+            $_SESSION['flash_message'] = "Terjadi kesalahan: " . $e->getMessage();
             $_SESSION['flash_type'] = "error";
         }
     } else {
@@ -39,136 +37,201 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
 }
 ?>
 
-<div class="max-w-5xl mx-auto">
+<div class="max-w-7xl mx-auto mb-20 px-4 sm:px-6 lg:px-8">
     
     <!-- Header Hero -->
-    <div class="text-center mb-12">
-        <h1 class="text-4xl font-serif font-bold text-slate-900 mb-4">Isi Ulang Token</h1>
-        <p class="text-lg text-slate-500 max-w-2xl mx-auto">Dapatkan token dengan mudah dan aman untuk mengakses ribuan koleksi buku digital kami.</p>
+    <div class="text-center mb-16 relative">
+        <h1 class="text-5xl md:text-6xl font-serif font-bold text-slate-900 mb-6 tracking-tight">
+            Isi Ulang 
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-amber-600">Token</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-sans leading-relaxed">
+            Dapatkan akses eksklusif ke ribuan buku premium. Pilih paket token yang sesuai dengan kebutuhan literasimu.
+        </p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
 
-        <!-- Left: Top Up Form -->
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+        <!-- Left Column: Token Selection -->
+        <div class="lg:col-span-8 space-y-8">
+            
+            <!-- Token Packages Card -->
+            <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-[10rem] -z-0"></div>
                 
-                <!-- Decorative BG for Form -->
-                <div class="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-bl-full -z-0"></div>
-                
-                <h2 class="text-2xl font-bold text-slate-800 mb-6 relative z-10 flex items-center gap-3">
-                    <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <h2 class="text-2xl font-bold text-slate-900 mb-8 relative z-10 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
                         </svg>
                     </span>
-                    Pilih Nominal
+                    Pilih Paket Token
                 </h2>
 
-                <!-- Form wrapper (prevent default submit to show modal) -->
-                <form id="topupForm" class="relative z-10 space-y-8" onsubmit="event.preventDefault(); showPaymentModal();">
+                <form id="topupForm" class="relative z-10" onsubmit="event.preventDefault(); showPaymentModal();">
                     
-                    <!-- Quick Select Grid -->
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- Packages Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-8">
                         <?php
                         $packages = [
-                            ['amount' => 50, 'price' => 50000, 'popular' => false],
-                            ['amount' => 100, 'price' => 100000, 'popular' => true],
-                            ['amount' => 250, 'price' => 250000, 'popular' => false],
-                            ['amount' => 500, 'price' => 500000, 'popular' => false],
-                            ['amount' => 1000, 'price' => 1000000, 'popular' => false],
-                            ['amount' => 2000, 'price' => 2000000, 'popular' => false],
+                            ['amount' => 50, 'price' => 50000, 'popular' => false, 'tier' => 'STARTER', 'color' => 'slate'],
+                            ['amount' => 100, 'price' => 100000, 'popular' => true, 'tier' => 'READER', 'color' => 'blue'],
+                            ['amount' => 250, 'price' => 250000, 'popular' => false, 'tier' => 'SCHOLAR', 'color' => 'indigo'],
+                            ['amount' => 500, 'price' => 500000, 'popular' => false, 'tier' => 'MASTER', 'color' => 'purple'],
+                            ['amount' => 1000, 'price' => 1000000, 'popular' => false, 'tier' => 'ELITE', 'color' => 'rose'],
+                            ['amount' => 2000, 'price' => 2000000, 'popular' => false, 'tier' => 'ULTIMATE', 'color' => 'amber'],
                         ];
+
+                        $colors = [
+                            'slate' => 'bg-slate-50 border-slate-100 peer-checked:bg-slate-900 peer-checked:text-white',
+                            'blue' => 'bg-blue-50/50 border-blue-100 peer-checked:bg-blue-600 peer-checked:text-white',
+                            'indigo' => 'bg-indigo-50/50 border-indigo-100 peer-checked:bg-indigo-600 peer-checked:text-white',
+                            'purple' => 'bg-purple-50/50 border-purple-100 peer-checked:bg-purple-600 peer-checked:text-white',
+                            'rose' => 'bg-rose-50/50 border-rose-100 peer-checked:bg-rose-600 peer-checked:text-white',
+                            'amber' => 'bg-amber-50/50 border-amber-100 peer-checked:bg-amber-500 peer-checked:text-white',
+                        ];
+
                         foreach ($packages as $pkg):
+                            $activeClass = $colors[$pkg['color']];
                             ?>
-                            <label class="cursor-pointer group relative">
-                                <input type="radio" name="selected_amount" value="<?= $pkg['amount'] ?>" class="peer sr-only" onchange="updateCustomAmount(this.value)">
-                                <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all text-center h-full flex flex-col items-center justify-center">
-                                    <?php if ($pkg['popular']): ?>
-                                            <div class="absolute -top-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-lg shadow-orange-500/30 tracking-wider">Terlaris</div>
-                                    <?php endif; ?>
-                                    <span class="text-3xl font-serif font-bold text-slate-800 group-hover:text-primary transition-colors"><?= $pkg['amount'] ?></span>
-                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Token</span>
-                                    <span class="mt-3 text-sm font-semibold text-slate-500">Rp <?= number_format($pkg['price'], 0, ',', '.') ?></span>
-                                </div>
-                            </label>
+                                <label class="cursor-pointer group relative">
+                                    <input type="radio" name="selected_amount" value="<?= $pkg['amount'] ?>" class="peer sr-only" onchange="updateCustomAmount(this.value)">
+                                
+                                    <div class="h-full p-6 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center justify-center text-center gap-2 hover:shadow-xl hover:-translate-y-1 <?= $activeClass ?>">
+                                    
+                                        <?php if ($pkg['popular']): ?>
+                                                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg shadow-orange-500/30 uppercase tracking-widest z-10 w-max">
+                                                    Best Seller
+                                                </div>
+                                        <?php endif; ?>
+
+                                        <div class="text-[10px] font-bold border border-current rounded-full px-2 py-0.5 opacity-60 uppercase tracking-widest mb-1 group-hover:opacity-100 transition-opacity">
+                                            <?= $pkg['tier'] ?>
+                                        </div>
+                                    
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-4xl font-serif font-bold tracking-tight"><?= $pkg['amount'] ?></span>
+                                            <span class="text-xs font-bold opacity-60">TKN</span>
+                                        </div>
+                                    
+                                        <div class="mt-2 text-sm font-bold bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 w-full">
+                                            Rp <?= number_format($pkg['price'], 0, ',', '.') ?>
+                                        </div>
+                                    </div>
+                                </label>
                         <?php endforeach; ?>
                     </div>
 
                     <!-- Manual Input -->
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Atau Masukkan Nominal Lain</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                                <span class="text-slate-400 font-bold text-xl">🪙</span>
+                    <div class="relative group mb-8">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-slate-200 to-slate-300 rounded-2xl opacity-50 group-hover:opacity-100 transition duration-300 blur-sm"></div>
+                        <div class="relative bg-white p-2 rounded-2xl flex items-center shadow-sm">
+                            <div class="pl-4 pr-3 text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
                             </div>
                             <input type="number" name="amount" id="amountInput" min="10" 
-                                class="w-full pl-14 pr-6 py-4 bg-white border-2 border-slate-200 rounded-xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-slate-900 font-bold text-2xl placeholder-slate-300 transition-all"
-                                placeholder="0" required>
-                            <div class="absolute inset-y-0 right-0 pr-6 flex items-center pointer-events-none">
-                                <span class="text-slate-400 font-bold text-sm">TOKEN</span>
+                                class="w-full py-4 bg-transparent outline-none text-slate-900 font-bold text-lg placeholder-slate-400"
+                                placeholder="Masukkan jumlah token manual..." required>
+                            <div class="pr-6 text-xs font-bold text-slate-400 uppercase tracking-widest hidden sm:block">
+                                Min. 10 Token
                             </div>
                         </div>
                     </div>
 
-                    <!-- Submit Button -->
+                    <!-- Submit Action -->
                     <button type="submit" 
-                        class="w-full py-5 bg-slate-900 hover:bg-primary text-white font-bold text-lg rounded-2xl shadow-xl shadow-slate-900/20 hover:shadow-primary/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        class="w-full py-5 bg-slate-900 text-white font-bold text-lg rounded-2xl shadow-xl shadow-slate-900/20 hover:shadow-2xl hover:bg-black transition-all hover:-translate-y-1 flex items-center justify-center gap-3 group">
+                        <span>Lanjut ke Pembayaran</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
-                        Lanjut ke Pembayaran
                     </button>
-                    <p class="text-center text-xs text-slate-400 mt-4 flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                        Transaksi aman & terenskripsi
-                    </p>
+
                 </form>
             </div>
+            
+            <!-- Security Badge -->
+            <div class="flex flex-wrap justify-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 py-4">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-xs font-bold text-slate-600">Enkripsi 256-bit SSL</span>
+                </div>
+                 <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-xs font-bold text-slate-600">Verifikasi Otomatis</span>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Right: Recent History -->
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 h-full">
-                <h3 class="font-serif font-bold text-xl text-slate-900 mb-6 px-2">Riwayat Transaksi</h3>
+        <!-- Right Column: History -->
+        <div class="lg:col-span-4 space-y-8">
+            <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-full min-h-[500px]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-lg text-slate-900">Riwayat Transaksi</h3>
+                    <a href="index.php?page=history" class="p-2 bg-slate-50 text-slate-500 hover:text-primary rounded-xl transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
                 
-                <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                <div class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                     <?php
-                    $stmt = $pdo->prepare("SELECT * FROM topups WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
+                    $stmt = $pdo->prepare("SELECT * FROM topups WHERE user_id = ? ORDER BY created_at DESC LIMIT 6");
                     $stmt->execute([$_SESSION['user_id']]);
                     $history = $stmt->fetchAll();
                     ?>
 
                     <?php if (empty($history)): ?>
-                            <div class="text-center py-12">
-                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                             <div class="h-full flex flex-col items-center justify-center text-center opacity-40">
+                                 <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                </div>
-                                <p class="text-slate-400 text-sm">Belum ada riwayat transaksi.</p>
+                                 </div>
+                                 <p class="font-bold text-slate-500">Belum ada aktivitas</p>
+                                 <p class="text-xs text-slate-400 mt-1">Mulai top up token pertamamu!</p>
                             </div>
                     <?php else: ?>
                             <?php foreach ($history as $h): ?>
-                                    <div class="group p-4 rounded-2xl border border-slate-100 hover:border-primary/30 hover:bg-slate-50 transition-all">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="font-bold text-slate-800 text-lg">🪙 <?= number_format($h['amount']) ?></span>
-                                            <?php
-                                            $statusConfig = match ($h['status']) {
-                                                'approved' => ['bg' => 'bg-emerald-100', 'text' => 'text-emerald-700', 'label' => 'Berhasil'],
-                                                'rejected' => ['bg' => 'bg-rose-100', 'text' => 'text-rose-700', 'label' => 'Gagal'],
-                                                default => ['bg' => 'bg-amber-100', 'text' => 'text-amber-700', 'label' => 'Pending']
-                                            };
-                                            ?>
-                                            <span class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wide <?= $statusConfig['bg'] ?> <?= $statusConfig['text'] ?>">
-                                                <?= $statusConfig['label'] ?>
-                                            </span>
+                                     <?php
+                                     $statusStyle = match ($h['status']) {
+                                         'approved' => 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                                         'rejected' => 'bg-rose-50 text-rose-600 border-rose-100',
+                                         default => 'bg-amber-50 text-amber-600 border-amber-100'
+                                     };
+                                     $statusIcon = match ($h['status']) {
+                                         'approved' => '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>',
+                                         'rejected' => '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>',
+                                         default => '<svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'
+                                     };
+                                     ?>
+                                    <div class="group relative bg-white border border-slate-100 rounded-2xl p-4 hover:border-slate-300 transition-colors cursor-default">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Top Up Token</p>
+                                                <div class="font-black text-slate-900 text-lg flex items-center gap-1">
+                                                    <?= number_format($h['amount']) ?>
+                                                    <span class="text-sm font-normal text-slate-500">TKN</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide border <?= $statusStyle ?>">
+                                                <?= $statusIcon ?>
+                                                <?= $h['status'] ?>
+                                            </div>
                                         </div>
-                                        <div class="flex justify-between items-center text-xs text-slate-400">
-                                            <span>ID: #<?= str_pad($h['id'], 6, '0', STR_PAD_LEFT) ?></span>
-                                            <span><?= date('d M, H:i', strtotime($h['created_at'])) ?></span>
+                                        <div class="flex justify-between items-center pt-2 border-t border-slate-50">
+                                            <span class="text-[10px] font-mono text-slate-400 font-bold">#<?= str_pad($h['id'], 8, '0', STR_PAD_LEFT) ?></span>
+                                            <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded"><?= date('d M, H:i', strtotime($h['created_at'])) ?></span>
                                         </div>
                                     </div>
                             <?php endforeach; ?>
@@ -179,74 +242,170 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
     </div>
 </div>
 
-<!-- Simulated Payment Modal -->
-<div id="paymentModal" class="fixed inset-0 z-[100] hidden">
-    <!-- Overlay -->
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closePaymentModal()"></div>
+<!-- Professional Payment Gateway Modal -->
+<div id="paymentModal" class="fixed inset-0 z-[100] hidden overflow-hidden" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="closePaymentModal()"></div>
     
-    <!-- Modal Content -->
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-6xl h-[90vh] md:h-[800px] bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up flex flex-col md:flex-row border border-slate-200">
         
-        <!-- Header -->
-        <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-            <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                Payment Gateway Simulator
-            </h3>
-            <button onclick="closePaymentModal()" class="text-slate-400 hover:text-rose-500 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+        <!-- Sidebar: Payment Methods (Left) -->
+        <div class="w-full md:w-[350px] bg-slate-50 border-r border-slate-200 flex flex-col flex-shrink-0">
+            <div class="p-6 border-b border-slate-200/60 bg-white">
+                <h3 class="font-bold text-slate-900 mb-1">Metode Pembayaran</h3>
+                <p class="text-xs text-slate-500 font-medium">Pilih salah satu metode yang tersedia</p>
+            </div>
+            
+            <div class="flex-grow overflow-y-auto custom-scrollbar p-4 space-y-6">
+                
+                <!-- Section: Virtual Accounts -->
+                <div>
+                    <p class="px-2 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Virtual Account</p>
+                    <div class="space-y-2">
+                        <!-- BCA -->
+                        <button onclick="selectMethod(this, 'bca')" class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div class="w-12 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">BCA</div>
+                            <div class="flex-grow relative z-10">
+                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">BCA Virtual Account</span>
+                                <span class="block text-[10px] text-slate-400">Verifikasi Otomatis</span>
+                            </div>
+                        </button>
+                        <!-- Mandiri -->
+                        <button onclick="selectMethod(this, 'mandiri')" class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div class="w-12 h-8 bg-blue-900 rounded flex items-center justify-center text-yellow-400 font-bold text-[10px] flex-shrink-0 border-b-4 border-yellow-400">BMRI</div>
+                            <div class="flex-grow relative z-10">
+                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">Mandiri VA</span>
+                                <span class="block text-[10px] text-slate-400">Verifikasi Otomatis</span>
+                            </div>
+                        </button>
+                        <!-- BRI -->
+                        <button onclick="selectMethod(this, 'bri')" class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div class="w-12 h-8 bg-blue-700 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">BRI</div>
+                            <div class="flex-grow relative z-10">
+                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">BRIVA</span>
+                                <span class="block text-[10px] text-slate-400">Verifikasi Otomatis</span>
+                            </div>
+                        </button>
+                         <!-- BNI -->
+                        <button onclick="selectMethod(this, 'bni')" class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div class="w-12 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">BNI</div>
+                            <div class="flex-grow relative z-10">
+                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">BNI VA</span>
+                                <span class="block text-[10px] text-slate-400">Verifikasi Otomatis</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section: E-Wallets -->
+                <div>
+                    <p class="px-2 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-t border-slate-200 pt-4">E-Wallet & QRIS</p>
+                    <div class="space-y-2">
+                        <!-- QRIS -->
+                        <button onclick="selectMethod(this, 'qris')" class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div class="w-12 h-8 bg-slate-800 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">QRIS</div>
+                            <div class="flex-grow relative z-10">
+                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">QRIS</span>
+                                <span class="block text-[10px] text-slate-400">Gopay, OVO, Dana, LinkAja</span>
+                            </div>
+                        </button>
+                        <!-- ShopeePay -->
+                         <button onclick="selectMethod(this, 'shopeepay')" class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div class="w-12 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">SPay</div>
+                            <div class="flex-grow relative z-10">
+                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">ShopeePay</span>
+                                <span class="block text-[10px] text-slate-400">App Redirect</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section: Retail -->
+                <div>
+                    <p class="px-2 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-t border-slate-200 pt-4">Gerai Retail</p>
+                    <div class="space-y-2">
+                        <!-- Indomaret -->
+                        <button onclick="selectMethod(this, 'indomaret')" class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div class="w-12 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 border-b-2 border-red-500 relative"><span class="absolute top-0 w-full h-1/3 bg-red-500"></span>Ind</div>
+                            <div class="flex-grow relative z-10">
+                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">Indomaret</span>
+                                <span class="block text-[10px] text-slate-400">Bayar di Kasir</span>
+                            </div>
+                        </button>
+                        <!-- Alfamart -->
+                        <button onclick="selectMethod(this, 'alfamart')" class="w-full p-3 flex items-center gap-4 bg-white border border-slate-200 rounded-xl hover:border-primary/50 hover:shadow-md transition-all group text-left relative overflow-hidden outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <div class="w-12 h-8 bg-red-600 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 relative overflow-hidden"><span class="absolute right-0 w-1/3 h-full bg-yellow-400 transform skew-x-12"></span>Alfa</div>
+                            <div class="flex-grow relative z-10">
+                                <span class="block font-bold text-slate-700 text-sm group-hover:text-primary">Alfamart</span>
+                                <span class="block text-[10px] text-slate-400">Bayar di Kasir</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
-        <!-- Body -->
-        <div class="p-8">
-            <div class="text-center mb-8">
-                <p class="text-slate-500 text-sm mb-1">Total Pembayaran</p>
-                <h2 class="text-3xl font-bold text-slate-900" id="modalAmountDisplay">Rp 0</h2>
-                <div class="mt-4 bg-yellow-50 text-yellow-700 text-xs px-4 py-2 rounded-lg border border-yellow-100 inline-block">
-                    ⚡ Mode Simulasi: Tidak ada uang asli yang dipotong
+        <!-- Main Content: Details (Right) -->
+        <div class="flex-grow bg-white flex flex-col relative">
+            
+            <!-- Top Bar -->
+            <div class="h-20 border-b border-slate-100 flex items-center justify-between px-8 bg-white z-20">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Pembayaran</p>
+                    <h2 class="text-2xl font-black text-slate-900 font-serif leading-none mt-1" id="gatewayAmount">Rp 0</h2>
+                </div>
+                <button onclick="closePaymentModal()" class="w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-grow p-8 md:p-12 overflow-y-auto bg-slate-50/30" id="paymentDetails">
+                <!-- Initial Empty State -->
+                <div class="h-full flex flex-col items-center justify-center text-center opacity-50 select-none">
+                    <div class="bg-white p-6 rounded-full shadow-sm mb-6 animate-pulse border border-slate-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Pilih metode pembayaran</h3>
+                    <p class="text-sm text-slate-400 max-w-xs mx-auto">Silakan pilih metode pembayaran yang tersedia di menu sebelah kiri untuk melanjutkan transaksi Anda.</p>
                 </div>
             </div>
 
-            <div class="space-y-3 mb-8">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Pilih Metode Pembayaran</p>
-                
-                <label class="flex items-center gap-4 p-4 border border-slate-200 rounded-xl cursor-pointer hover:border-primary hover:bg-slate-50 transition-all group">
-                    <input type="radio" name="payment_method" class="peer sr-only" checked>
-                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold">B</div>
-                    <div class="flex-grow">
-                        <p class="font-bold text-slate-800 text-sm">Virtual Account Bank</p>
-                        <p class="text-xs text-slate-400">BCA, Mandiri, BNI, BRI</p>
+            <!-- Bottom Action Bar -->
+            <div class="p-6 border-t border-slate-100 bg-white z-30 hidden shadow-[0_-5px_20px_rgba(0,0,0,0.02)]" id="paymentAction">
+                <div class="flex items-center gap-4">
+                    <div class="flex-grow hidden md:block">
+                        <p class="text-xs font-bold text-slate-400">Batas Waktu Pembayaran</p>
+                        <p class="text-sm font-bold text-rose-500 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            23 Jam 59 Menit
+                        </p>
                     </div>
-                    <div class="w-4 h-4 rounded-full border border-slate-300 peer-checked:bg-primary peer-checked:border-primary"></div>
-                </label>
-
-                <label class="flex items-center gap-4 p-4 border border-slate-200 rounded-xl cursor-pointer hover:border-primary hover:bg-slate-50 transition-all group">
-                    <input type="radio" name="payment_method" class="peer sr-only">
-                    <div class="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center font-bold">QR</div>
-                    <div class="flex-grow">
-                        <p class="font-bold text-slate-800 text-sm">QRIS / E-Wallet</p>
-                        <p class="text-xs text-slate-400">GoPay, OVO, ShopeePay</p>
-                    </div>
-                    <div class="w-4 h-4 rounded-full border border-slate-300 peer-checked:bg-primary peer-checked:border-primary"></div>
-                </label>
+                    <button onclick="confirmPayment()" class="flex-grow md:flex-grow-0 md:w-auto w-full px-8 py-4 bg-slate-900 text-white font-bold rounded-xl shadow-lg shadow-slate-900/10 hover:bg-primary hover:shadow-primary/30 transition-all flex items-center justify-center gap-3">
+                        <span>Saya Sudah Membayar</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button onclick="closePaymentModal()" class="hidden md:flex px-6 py-4 border border-slate-200 text-slate-500 font-bold rounded-xl hover:bg-slate-50 hover:text-slate-800 transition-all">
+                        Batal
+                    </button>
+                </div>
             </div>
 
-            <button onclick="processPayment()" id="payButton"
-                class="w-full py-4 bg-primary hover:bg-amber-700 text-white font-bold rounded-xl shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2">
-                Bayar Sekarang
-            </button>
         </div>
     </div>
 </div>
 
-<!-- Actual Hidden Form for Submission -->
-<form method="POST" id="realSubmitForm">
-    <input type="hidden" name="amount" id="realAmountInput">
+<!-- Hidden Form to Submit -->
+<form method="POST" id="hiddenSubmitForm">
+    <input type="hidden" name="amount" id="hiddenAmount">
     <input type="hidden" name="simulate_payment" value="true">
 </form>
 
@@ -261,47 +420,181 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simulate_payment'])) 
             alert('Minimal top up 10 Token');
             return;
         }
-
-        // Calculate Price (1 Token = Rp 1.000)
-        const price = amount * 1000;
-        document.getElementById('modalAmountDisplay').innerText = 'Rp ' + price.toLocaleString('id-ID');
-        document.getElementById('realAmountInput').value = amount;
         
+        const price = amount * 1000;
+        document.getElementById('gatewayAmount').innerText = 'Rp ' + price.toLocaleString('id-ID');
+        document.getElementById('hiddenAmount').value = amount;
+        
+        // Reset Modal State
         document.getElementById('paymentModal').classList.remove('hidden');
+        document.getElementById('paymentAction').classList.add('hidden');
+        
+        // Reset Active Buttons
+         document.querySelectorAll('#paymentModal button').forEach(b => {
+             b.classList.remove('border-primary/50', 'ring-2', 'ring-primary', 'ring-offset-2', 'bg-blue-50');
+         });
+
+        // Reset Detail View
+        const defaultView = `
+             <div class="h-full flex flex-col items-center justify-center text-center opacity-50 select-none animate-fade-in-up">
+                <div class="bg-white p-6 rounded-full shadow-sm mb-6 border border-slate-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Pilih metode pembayaran</h3>
+                <p class="text-sm text-slate-400 max-w-xs mx-auto">Silakan pilih metode pembayaran yang tersedia di menu sebelah kiri untuk melanjutkan transaksi Anda.</p>
+            </div>
+        `;
+        document.getElementById('paymentDetails').innerHTML = defaultView;
     }
 
     function closePaymentModal() {
         document.getElementById('paymentModal').classList.add('hidden');
     }
 
-    function processPayment() {
-        const btn = document.getElementById('payButton');
-        const originalText = btn.innerHTML;
+    function selectMethod(btn, method) {
+        // Reset all buttons
+        document.querySelectorAll('#paymentModal button').forEach(b => {
+             b.classList.remove('border-primary', 'ring-2', 'ring-primary', 'ring-offset-2', 'bg-blue-50');
+             b.classList.add('border-slate-200', 'bg-white');
+        });
         
-        // Loading State
-        btn.disabled = true;
+        // Highlight active button
+        btn.classList.remove('border-slate-200', 'bg-white');
+        btn.classList.add('border-primary', 'ring-2', 'ring-primary', 'ring-offset-2', 'bg-blue-50');
+
+        // Render Content based on Method
+        const details = document.getElementById('paymentDetails');
+        const price = document.getElementById('gatewayAmount').innerText;
+        
+        // Random VA Generator
+        const vaMap = {
+            'bca': '8277', 'mandiri': '8902', 'bri': '8881', 'bni': '8005', 'shopeepay': '112', 'indomaret': 'IND', 'alfamart': 'ALF'
+        };
+        const prefix = vaMap[method] || '9999';
+        const suffix = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+        // Mask the middle part
+        const maskedVA = prefix + ' ' + suffix.substring(0, 3) + 'xxxx ' + suffix.substring(7);
+        const fullVA = prefix + suffix; // For copy functional if needed
+
+        let content = '';
+
+        if (method === 'qris') {
+            content = `
+                <div class="h-full flex flex-col items-center justify-center animate-fade-in-up">
+                    <div class="bg-white p-8 rounded-3xl shadow-2xl shadow-slate-200 border border-slate-100 text-center relative overflow-hidden max-w-sm w-full">
+                        <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-red-500 via-white to-red-500 opacity-50"></div>
+                        
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png" 
+                             class="w-48 h-48 mx-auto mb-6 p-2 border-2 border-dashed border-slate-300 rounded-xl opacity-80" alt="QR Code">
+                        
+                        <p class="font-black text-slate-800 text-xl tracking-tight mb-1">Nugra21 Bookstore</p>
+                        <p class="text-xs font-mono text-slate-400 mb-6">NMID: ID1020038829xxx</p>
+
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex justify-between items-center mb-4">
+                            <span class="text-xs font-bold text-slate-500 uppercase">Total Bayar</span>
+                            <span class="font-black text-slate-900">${price}</span>
+                        </div>
+
+                        <div class="flex justify-center gap-4 grayscale opacity-60">
+                             <div class="h-5 w-8 bg-slate-300 rounded"></div>
+                             <div class="h-5 w-8 bg-slate-300 rounded"></div>
+                             <div class="h-5 w-8 bg-slate-300 rounded"></div>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-sm font-bold text-slate-500 animate-pulse">Menunggu pembayaran...</p>
+                </div>
+            `;
+        } else {
+            // Virtual Account & Retail Layout
+            const logoColor = method === 'mandiri' ? 'text-yellow-500' : (method === 'bni' || method === 'shopeepay' ? 'text-orange-500' : (method === 'alfamart' ? 'text-red-600' : 'text-blue-600'));
+            
+            content = `
+                <div class="max-w-2xl mx-auto animate-fade-in-up space-y-8">
+                    
+                    <!-- Header Step -->
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-bold text-lg text-slate-500 border border-slate-200">1</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900">Selesaikan Pembayaran</h4>
+                            <p class="text-sm text-slate-500">Kirim dana ke nomor tujuan di bawah ini.</p>
+                        </div>
+                    </div>
+
+                    <!-- VA Card -->
+                    <div class="bg-white border text-center md:text-left border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-all">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 ${logoColor}" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+
+                        <div class="relative z-10">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Nomor Virtual Account / Kode Bayar</p>
+                            <div class="flex flex-col md:flex-row items-center gap-4">
+                                <span class="font-mono font-bold text-3xl md:text-4xl text-slate-800 tracking-tight">${maskedVA}</span>
+                                <button class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors uppercase tracking-wider">
+                                    Salin
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Card -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Nominal Transfer</p>
+                            <p class="text-xs text-rose-500 font-bold">*Jangan dibulatkan</p>
+                        </div>
+                        <span class="font-black text-2xl text-slate-900">${price}</span>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div>
+                         <div class="flex items-center gap-4 mb-4">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-sm text-slate-500 border border-slate-200">2</div>
+                            <h4 class="font-bold text-slate-700 text-sm">Cara Membayar</h4>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100 text-sm text-slate-600">
+                             <div class="p-4 hover:bg-slate-50 cursor-pointer flex justify-between group/acc">
+                                <span>ATM ${method.toUpperCase()}</span>
+                                <svg class="w-5 h-5 text-slate-300 group-hover/acc:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                             </div>
+                             <div class="p-4 hover:bg-slate-50 cursor-pointer flex justify-between group/acc">
+                                <span>Mobile Banking</span>
+                                <svg class="w-5 h-5 text-slate-300 group-hover/acc:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                             </div>
+                             <div class="p-4 hover:bg-slate-50 cursor-pointer flex justify-between group/acc">
+                                <span>Internet Banking</span>
+                                <svg class="w-5 h-5 text-slate-300 group-hover/acc:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                             </div>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        details.innerHTML = content;
+        document.getElementById('paymentAction').classList.remove('hidden');
+    }
+
+    function confirmPayment() {
+        const btn = document.querySelector('#paymentAction button');
         btn.innerHTML = `
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Memproses Transaksi...
+            Memproses...
         `;
-
-        // Simulate 2s delay
+        btn.disabled = true;
+        btn.classList.add('opacity-80', 'cursor-not-allowed');
+        
+        // Submit after visual delay
         setTimeout(() => {
-            btn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                Pembayaran Berhasil!
-            `;
-            btn.classList.remove('bg-primary', 'hover:bg-amber-700');
-            btn.classList.add('bg-green-500');
-
-            setTimeout(() => {
-                document.getElementById('realSubmitForm').submit();
-            }, 1000);
-        }, 2000);
+            document.getElementById('hiddenSubmitForm').submit();
+        }, 1500);
     }
 </script>

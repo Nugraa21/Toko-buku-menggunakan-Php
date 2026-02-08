@@ -89,8 +89,8 @@ $top_rated_books = $pdo->query("
     </div>
 
     <!-- Top Up Total Card -->
-    <div
-        class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-book-hover transition-all duration-300 group relative overflow-hidden">
+    <a href="index.php?page=admin_topup"
+        class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-book-hover transition-all duration-300 group relative overflow-hidden block">
         <div
             class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-50 to-transparent rounded-bl-[4rem] -z-0 group-hover:scale-110 transition-transform">
         </div>
@@ -110,7 +110,7 @@ $top_rated_books = $pdo->query("
                 </p>
             </div>
         </div>
-    </div>
+    </a>
 
     <!-- Users Card -->
     <div
