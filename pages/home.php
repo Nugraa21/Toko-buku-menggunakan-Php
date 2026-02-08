@@ -301,7 +301,7 @@ if (empty($best_sellers))
                 class="px-10 py-4 bg-white text-secondary font-bold rounded-xl hover:bg-paper transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-2">
                 Jelajahi Katalog
             </a>
-            <a href="#"
+            <a href="index.php?page=faq"
                 class="px-10 py-4 bg-transparent border border-white/20 text-white font-bold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2">
                 Pelajari Lebih Lanjut
             </a>
