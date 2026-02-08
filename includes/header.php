@@ -195,7 +195,8 @@
                                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Signed in as
                                     </p>
                                     <p class="text-sm font-bold text-slate-900 truncate font-serif">
-                                        <?= $_SESSION['user_name'] ?></p>
+                                        <?= $_SESSION['user_name'] ?>
+                                    </p>
                                     <?php if (!isAdmin()): ?>
                                         <div
                                             class="mt-2 flex items-center gap-2 text-primary text-xs font-bold bg-white px-2 py-1 rounded-lg border border-primary/10 inline-flex">
@@ -367,7 +368,8 @@
                                 <div class="font-bold text-slate-900"><?= $_SESSION['user_name'] ?></div>
                                 <?php if (!isAdmin()): ?>
                                     <div class="text-xs text-primary font-bold mt-0.5">Saldo:
-                                        <?= number_format($current_tokens) ?> Token</div>
+                                        <?= number_format($current_tokens) ?> Token
+                                    </div>
                                 <?php else: ?>
                                     <div class="text-xs text-slate-500">Administrator</div>
                                 <?php endif; ?>
@@ -400,7 +402,7 @@
     </div>
 
     <!-- Main Content Spacer/Wrapper (Opened here, closed in footer.php) -->
-    <div class="pt-24 min-h-[80vh] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-grow">
+    <div class="pt-32 min-h-[85vh] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-grow">
         <?php if (isset($_SESSION['flash_message'])): ?>
             <div class="mb-8 animate-fade-in-down w-full max-w-2xl mx-auto">
                 <div
@@ -422,7 +424,8 @@
                     </div>
                     <div>
                         <p class="font-bold text-lg mb-1">
-                            <?= $_SESSION['flash_type'] == 'success' ? 'Berhasil' : 'Perhatian' ?></p>
+                            <?= $_SESSION['flash_type'] == 'success' ? 'Berhasil' : 'Perhatian' ?>
+                        </p>
                         <p class="text-sm opacity-90"><?= $_SESSION['flash_message'];
                         unset($_SESSION['flash_message']); ?>
                         </p>

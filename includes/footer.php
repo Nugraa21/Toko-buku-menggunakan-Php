@@ -1,6 +1,6 @@
 </div> <!-- Closing Main Content Wrapper from header.php -->
 
-<footer class="bg-slate-900 pt-24 pb-12 mt-auto relative w-full overflow-hidden font-sans">
+<footer class="bg-slate-900 pt-32 pb-12 mt-24 relative w-full overflow-hidden font-sans">
 
     <!-- Top Wave Decoration -->
     <div class="absolute top-0 left-0 w-full overflow-hidden leading-[0] z-10 w-full transform -translate-y-px">
@@ -91,7 +91,7 @@
                     </li>
                     <li><a href="index.php?page=faq"
                             class="text-slate-400 hover:text-amber-500 transition-colors hover:pl-1">FAQ</a></li>
-                    <li><a href="https://wa.me/6281234567890" target="_blank"
+                    <li><a href="index.php?page=contact"
                             class="text-slate-400 hover:text-amber-500 transition-colors hover:pl-1">Kontak</a></li>
                 </ul>
             </div>
