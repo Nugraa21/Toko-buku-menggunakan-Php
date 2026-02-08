@@ -48,4 +48,12 @@ function getCartCount()
 {
     return isset($_SESSION['cart']) ? array_sum($_SESSION['cart']) : 0;
 }
+
+function getBookRating($pdo, $book_id)
+{
+    $stmt = $pdo->prepare("SELECT AVG(rating) as avg_rating FROM reviews WHERE book_id = ?");
+    $stmt->execute([$book_id]);
+    $result = $stmt->fetch();
+    return $result['avg_rating'] ? round($result['avg_rating'], 1) : 0.0;
+}
 ?>
