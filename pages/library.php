@@ -42,31 +42,65 @@ $books = $stmt->fetchAll();
             </a>
         </div>
     <?php else: ?>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
             <?php foreach ($books as $book): ?>
-                <div
-                    class="group bg-white rounded-xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div class="relative aspect-[3/4] bg-slate-100 overflow-hidden">
-                        <img src="assets/images/<?= htmlspecialchars($book['image']) ?>"
-                            alt="<?= htmlspecialchars($book['title']) ?>"
-                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                <div class="group relative">
+                    <!-- Book Card -->
+                    <div
+                        class="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100 hover:shadow-book-hover transition-all duration-500 flex flex-col h-full relative z-10">
 
-                        <!-- Overlay Action -->
+                        <!-- Image Container -->
                         <div
-                            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button onclick="alert('Ini simulasi membaca buku <?= htmlspecialchars($book['title']) ?>.')"
-                                class="px-6 py-2 bg-white text-slate-900 font-bold rounded-full hover:bg-primary hover:text-white transition-colors">
-                                Baca Sekarang
-                            </button>
+                            class="relative aspect-[2/3] rounded-2xl overflow-hidden mb-6 shadow-book group-hover:shadow-2xl transition-all duration-500">
+                            <img src="assets/images/<?= htmlspecialchars($book['image']) ?>"
+                                alt="<?= htmlspecialchars($book['title']) ?>"
+                                class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
+
+                            <!-- Overlay Gradient -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500">
+                            </div>
+
+                            <!-- Read Button Overlay -->
+                            <div
+                                class="absolute inset-0 z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 gap-3">
+                                <button onclick="alert('Membuka reader untuk: <?= htmlspecialchars($book['title']) ?>')"
+                                    class="px-6 py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-primary hover:text-white transition-all shadow-xl transform translate-y-4 group-hover:translate-y-0 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    Baca Sekarang
+                                </button>
+                            </div>
+
+                            <!-- Owned Badge -->
+                            <div
+                                class="absolute top-3 right-3 px-3 py-1 bg-green-500/90 backdrop-blur text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-lg">
+                                Milik Anda
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex flex-col flex-1 px-2 text-center">
+                            <h3
+                                class="font-serif font-bold text-xl text-slate-900 leading-tight mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                <?= htmlspecialchars($book['title']) ?>
+                            </h3>
+                            <p class="text-slate-500 text-sm italic font-sans mb-4">
+                                by <?= htmlspecialchars($book['author']) ?>
+                            </p>
+
+                            <div class="mt-auto pt-4 border-t border-slate-50 w-full">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Digital Copy</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-slate-800 line-clamp-1 mb-1" title="<?= htmlspecialchars($book['title']) ?>">
-                            <?= htmlspecialchars($book['title']) ?>
-                        </h4>
-                        <p class="text-xs text-slate-500">
-                            <?= htmlspecialchars($book['author']) ?>
-                        </p>
+
+                    <!-- Decorative Background Blob -->
+                    <div
+                        class="absolute inset-0 bg-accent/5 rounded-[2.5rem] transform -rotate-2 scale-95 -z-10 group-hover:-rotate-3 transition-transform duration-500 opacity-0 group-hover:opacity-100">
                     </div>
                 </div>
             <?php endforeach; ?>
