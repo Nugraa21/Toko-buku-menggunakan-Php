@@ -443,7 +443,8 @@ $top_rated_books = $pdo->query("
                             <div
                                 class="w-10 h-14 rounded bg-slate-100 shadow-sm overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
                                 <?php if ($tb['cover_image']): ?>
-                                    <img src="<?= htmlspecialchars($tb['cover_image']) ?>" class="w-full h-full object-cover">
+                                    <img src="assets/images/<?= htmlspecialchars($tb['cover_image']) ?>"
+                                        class="w-full h-full object-cover">
                                 <?php endif; ?>
                             </div>
                         </div>
